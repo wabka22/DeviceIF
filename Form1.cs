@@ -90,6 +90,7 @@ namespace SerialPlot
             if (start)
             {
                 DateTime timeNow = DateTime.Now;
+                serialPort_.DataReceived += _serialPort_DataReceived;
                 string dataRead = serialPort_.ReadLine();
                 int value;
 
@@ -102,7 +103,6 @@ namespace SerialPlot
                     chart1.Series[0].Points.AddXY(timeNow, 0);
                 }
 
-                serialPort_.DataReceived += _serialPort_DataReceived;
                 _countSeconds++;
                 UpdateSensorData(value);
 
