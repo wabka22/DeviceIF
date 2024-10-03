@@ -5,6 +5,8 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
+// 1. Device - 
+
 namespace SerialPlot
 {
     public partial class Form1 : Form
