@@ -5,41 +5,47 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
-// 1. Device - 
 
-namespace SerialPlot
+namespace DeviceIF
 {
     public partial class Form1 : Form
     {
-        private  bool start=false;
+        private bool start = false;
         private bool first_connection = true;
-        private bool  isSerialPortSelectChange=false;
-        private SerialPort serialPort_;
-        private SerialParser parser;
+        private Device _device = new Device();
         private object lockUpdate = new object();
         private int _countSeconds = 0;
 
         public Form1()
         {
             InitializeComponent();
-            StartPosition=FormStartPosition.CenterScreen;
+            StartPosition = FormStartPosition.CenterScreen;
             LoadAvailablePorts();
 
             this.KeyPreview = true;
-            this.KeyDown += new KeyEventHandler(Form1_KeyDown); 
+            this.KeyDown += new KeyEventHandler(Form1_KeyDown);
+
+            port_comboBox.SelectedIndexChanged += port_comboBox_SelectedIndexChanged;
+            _device.DataReceived += OnDeviceDataReceived;
         }
 
         private void LoadAvailablePorts()
         {
             string[] ports = SerialPort.GetPortNames();
 
-            comboBox1.Items.Clear();
+            port_comboBox.Items.Clear();
+            Baud_Rate_comboBox.Items.Clear();
 
-            comboBox1.Items.AddRange(ports);
+            int[] baudRates = { 110, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800 };
+
+            Baud_Rate_comboBox.Items.AddRange(baudRates.Cast<object>().ToArray());
+            Baud_Rate_comboBox.SelectedItem = 115200;
+
+            port_comboBox.Items.AddRange(ports);
 
             if (ports.Length > 0)
             {
-                comboBox1.SelectedIndex = 0;
+                port_comboBox.SelectedIndex = 0;
             }
             else
             {
@@ -47,17 +53,24 @@ namespace SerialPlot
             }
         }
 
+        private void port_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (first_connection)
+            {
+                OpenSelectedPort();
+                first_connection = false;
+                start = true;
+            }
+        }
+
         private void OpenSelectedPort()
         {
-            if (comboBox1.SelectedItem != null)
+            if (port_comboBox.SelectedItem != null)
             {
-                string selectedPort = comboBox1.SelectedItem.ToString();
+                string selectedPort = port_comboBox.SelectedItem.ToString();
                 try
                 {
-                    serialPort_ = new SerialPort(selectedPort);
-                    serialPort_.BaudRate = 115200;
-                    serialPort_.Open();
-
+                    _device.Open(selectedPort, (int)Baud_Rate_comboBox.SelectedItem);
                 }
                 catch (Exception ex)
                 {
@@ -66,111 +79,34 @@ namespace SerialPlot
             }
         }
 
-   
-        private void Form1_Load(object sender, EventArgs e)
+        private void OnDeviceDataReceived(int value)
         {
-            timer1.Enabled = true;
-            serialPort_ = new SerialPort();
-
-            chart1.ChartAreas[0].AxisY.Maximum = 150;
-            chart1.ChartAreas[0].AxisY.Minimum = -20;
-
-            chart1.ChartAreas[0].AxisX.LabelStyle.Format = "H:mm::ss";
-            chart1.Series[0].XValueType = ChartValueType.DateTime;
-
-            chart1.ChartAreas[0].AxisX.Minimum = DateTime.Now.ToOADate();
-            chart1.ChartAreas[0].AxisX.Maximum = DateTime.Now.AddSeconds(30).ToOADate();
-
-            chart1.ChartAreas[0].AxisX.IntervalType = DateTimeIntervalType.Seconds;
-            chart1.ChartAreas[0].AxisX.Interval = 5;
-
-        }
-
-
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            if (start)
+            DateTime timeNow = DateTime.Now; 
+            Invoke(new Action(() =>
             {
-                DateTime timeNow = DateTime.Now;
-                serialPort_.DataReceived += _serialPort_DataReceived;
-                string dataRead = serialPort_.ReadLine();
-                int value;
+                chart1.Series[0].Points.AddXY(timeNow, value);
 
-                if (int.TryParse(dataRead, out value))
-                {
-                    chart1.Series[0].Points.AddXY(timeNow, value);
-                }
-                else
-                {
-                    chart1.Series[0].Points.AddXY(timeNow, 0);
-                }
+                chart1.ChartAreas[0].AxisX.Minimum = DateTime.Now.AddSeconds(-30).ToOADate(); 
+                chart1.ChartAreas[0].AxisX.Maximum = DateTime.Now.ToOADate(); 
 
-                _countSeconds++;
-                UpdateSensorData(value);
+                chart1.ChartAreas[0].AxisX.IntervalType = DateTimeIntervalType.Seconds;
+                chart1.ChartAreas[0].AxisX.Interval = 5;
 
-                if (_countSeconds == 200)
-                {
-                    _countSeconds = 0;
-                    chart1.ChartAreas[0].AxisX.Minimum = DateTime.Now.ToOADate();
-                    chart1.ChartAreas[0].AxisX.Maximum = DateTime.Now.AddSeconds(30).ToOADate();
+                chart1.ChartAreas[0].AxisX.LabelStyle.Format = "HH:mm:ss";
 
-                    chart1.ChartAreas[0].AxisX.IntervalType = DateTimeIntervalType.Seconds;
-                    chart1.ChartAreas[0].AxisX.Interval = 5;
-                }
-            }
-
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            if (!start)
-            {
-                if (first_connection)
-                {
-                    OpenSelectedPort();
-                    button1.Text = "STOP";
-                    _countSeconds = 0;
-                    first_connection = false;   
-                }
-                start = true;
-            }
-            else {
-                button1.Text = "START";
-                start = false;
-            }
-        }
-
-
-        private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            try{
-                string dataRead = serialPort_.ReadLine();
-                lock (lockUpdate)
-                {
-                    if (start)
-                    {
-                        label.Text = dataRead.ToString();
-                        Dictionary<string, double> records = parser.ParsingMatch(dataRead);
-                        if (records.Count == 0) start=false;
-
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                string error = ex.Message;
-            }
+                UpdateSensorData(value); 
+            }));
         }
 
         private void UpdateSensorData(double value)
         {
-            if (label.InvokeRequired)
+            if (value_label.InvokeRequired)
             {
-                label.Invoke(new Action(() => label.Text = $"Значение датчика: {value}"));
+                value_label.Invoke(new Action(() => value_label.Text = $"Значение датчика: {value}"));
             }
             else
             {
-                label.Text = $"Значение датчика: {value}";
+                value_label.Text = $"Значение датчика: {value}";
             }
         }
 
@@ -178,10 +114,29 @@ namespace SerialPlot
         {
             if (e.KeyCode == Keys.Escape)
             {
-                start=false;
-                this.Close();  
+                start = false;
+                this.Close();
             }
         }
 
+        private void start_button_Click(object sender, EventArgs e)
+        {
+            if (!start)
+            {
+                if (first_connection)
+                {
+                    OpenSelectedPort();
+                    start_button.Text = "STOP";
+                    _countSeconds = 0;
+                    first_connection = false;
+                }
+                start = true;
+            }
+            else
+            {
+                start_button.Text = "START";
+                start = false;
+            }
+        }
     }
 }

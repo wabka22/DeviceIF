@@ -37,3 +37,4 @@ C:\Users\alexe\Desktop\Новая папка\SerialPlot\obj\Debug\SerialPlot.csp
 C:\Users\alexe\Desktop\Новая папка\SerialPlot\obj\Debug\SerialPlot.csproj.CoreCompileInputs.cache
 C:\Users\alexe\Desktop\Новая папка\SerialPlot\obj\Debug\SerialPlot.exe
 C:\Users\alexe\Desktop\Новая папка\SerialPlot\obj\Debug\SerialPlot.pdb
+C:\Users\alexe\Desktop\SerialPlot\obj\Debug\DeviceIF.Form1.resources
