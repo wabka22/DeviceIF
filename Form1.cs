@@ -1,20 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
 
+
 namespace DeviceIF
 {
     public partial class Form1 : Form
     {
-        private bool start = false;
-        private bool first_connection = true;
         private Device _device = new Device();
-        private object lockUpdate = new object();
-        private int _countSeconds = 0;
 
         public Form1()
         {
@@ -55,11 +51,9 @@ namespace DeviceIF
 
         private void port_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (first_connection)
+            if (!_device.IsOpen)
             {
                 OpenSelectedPort();
-                first_connection = false;
-                start = true;
             }
         }
 
@@ -71,6 +65,7 @@ namespace DeviceIF
                 try
                 {
                     _device.Open(selectedPort, (int)Baud_Rate_comboBox.SelectedItem);
+                    state_label.Text = "Подключено";
                 }
                 catch (Exception ex)
                 {
@@ -81,20 +76,22 @@ namespace DeviceIF
 
         private void OnDeviceDataReceived(int value)
         {
-            DateTime timeNow = DateTime.Now; 
+            if (start_button.Text == "START") return;
+
+            DateTime timeNow = DateTime.Now;
             Invoke(new Action(() =>
             {
                 chart1.Series[0].Points.AddXY(timeNow, value);
 
-                chart1.ChartAreas[0].AxisX.Minimum = DateTime.Now.AddSeconds(-30).ToOADate(); 
-                chart1.ChartAreas[0].AxisX.Maximum = DateTime.Now.ToOADate(); 
+                chart1.ChartAreas[0].AxisX.Minimum = DateTime.Now.AddSeconds(-30).ToOADate();
+                chart1.ChartAreas[0].AxisX.Maximum = DateTime.Now.ToOADate();
 
                 chart1.ChartAreas[0].AxisX.IntervalType = DateTimeIntervalType.Seconds;
                 chart1.ChartAreas[0].AxisX.Interval = 5;
 
                 chart1.ChartAreas[0].AxisX.LabelStyle.Format = "HH:mm:ss";
 
-                UpdateSensorData(value); 
+                UpdateSensorData(value);
             }));
         }
 
@@ -114,29 +111,29 @@ namespace DeviceIF
         {
             if (e.KeyCode == Keys.Escape)
             {
-                start = false;
+                _device.Close(); 
                 this.Close();
             }
         }
 
         private void start_button_Click(object sender, EventArgs e)
         {
-            if (!start)
+            if (start_button.Text == "START")
             {
-                if (first_connection)
+                if (!_device.IsOpen)
                 {
                     OpenSelectedPort();
-                    start_button.Text = "STOP";
-                    _countSeconds = 0;
-                    first_connection = false;
                 }
-                start = true;
+                start_button.Text = "STOP";
+                state_label.Text = "Подключено";
             }
             else
             {
                 start_button.Text = "START";
-                start = false;
+                state_label.Text = "Остановлено";
             }
         }
+
+
     }
 }

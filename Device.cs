@@ -12,7 +12,13 @@ namespace DeviceIF
         private SerialPort _serialPort;
         public event Action<int> DataReceived;
 
-        public bool IsOpen => _serialPort?.IsOpen ?? false;
+        public bool IsOpen
+        {
+            get
+            {
+                return (_serialPort != null) ? _serialPort.IsOpen : false;
+            }
+        }
 
         public void Open(string portName, int baudRate)
         {
@@ -39,18 +45,16 @@ namespace DeviceIF
 
         private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            try
+            string dataRead = _serialPort.ReadLine();
+
+            int value;
+
+            if (int.TryParse(dataRead, out value))
             {
-                string dataRead = _serialPort.ReadLine();
-                if (int.TryParse(dataRead, out int value))
-                {
-                    DataReceived?.Invoke(value); 
-                }
+                DataReceived?.Invoke(value); 
             }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error while receiving data: {ex.Message}");
-            }
+ 
         }
+
     }
 }
