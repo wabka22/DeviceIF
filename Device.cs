@@ -10,51 +10,44 @@ namespace DeviceIF
     public class Device
     {
         private SerialPort _serialPort;
-        public event Action<int> DataReceived;
+        public event Action<int> OnDataParsed;
 
-        public bool IsOpen
+        private void HandleDataReceived(object sender, SerialDataReceivedEventArgs eventArgs)
         {
-            get
+            string receivedData = _serialPort.ReadLine();
+            Console.WriteLine($"Received Data: {receivedData}");// For debugging
+
+            if (int.TryParse(receivedData, out int parsedInteger))
             {
-                return (_serialPort != null) ? _serialPort.IsOpen : false;
+                OnDataParsed.Invoke(parsedInteger);
             }
         }
 
-        public void Open(string portName, int baudRate)
+
+        public void Connect(string portName, int baudRate) 
         {
-            if (_serialPort != null && _serialPort.IsOpen)
-                _serialPort.Close();
+            if (_serialPort != null && _serialPort.IsOpen) _serialPort.Close();
 
-            _serialPort = new SerialPort(portName)
-            {
-                BaudRate = baudRate
-            };
+            _serialPort = new SerialPort(portName)  {BaudRate = baudRate};
 
-            _serialPort.DataReceived += OnDataReceived;
+            _serialPort.DataReceived += HandleDataReceived; 
             _serialPort.Open();
         }
 
-        public void Close()
+        public void Disconnect() 
         {
-            if (_serialPort != null && _serialPort.IsOpen)
+            if (_serialPort != null && _serialPort.IsOpen) 
             {
-                _serialPort.DataReceived -= OnDataReceived;
+                _serialPort.DataReceived -= HandleDataReceived; 
                 _serialPort.Close();
             }
         }
 
-        private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
+        public bool IsConnected()
         {
-            string dataRead = _serialPort.ReadLine();
-
-            int value;
-
-            if (int.TryParse(dataRead, out value))
-            {
-                DataReceived?.Invoke(value); 
-            }
- 
+            return (_serialPort != null) ? _serialPort.IsOpen : false;
         }
+
 
     }
 }

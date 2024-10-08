@@ -16,13 +16,13 @@ namespace DeviceIF
         {
             InitializeComponent();
             StartPosition = FormStartPosition.CenterScreen;
-            LoadAvailablePorts();
 
+            LoadAvailablePorts();
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(Form1_KeyDown);
 
             port_comboBox.SelectedIndexChanged += port_comboBox_SelectedIndexChanged;
-            _device.DataReceived += OnDeviceDataReceived;
+            _device.OnDataParsed += OnDeviceDataReceived;
         }
 
         private void LoadAvailablePorts()
@@ -51,7 +51,7 @@ namespace DeviceIF
 
         private void port_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (!_device.IsOpen)
+            if (!_device.IsConnected())
             {
                 OpenSelectedPort();
             }
@@ -64,7 +64,7 @@ namespace DeviceIF
                 string selectedPort = port_comboBox.SelectedItem.ToString();
                 try
                 {
-                    _device.Open(selectedPort, (int)Baud_Rate_comboBox.SelectedItem);
+                    _device.Connect(selectedPort, (int)Baud_Rate_comboBox.SelectedItem);
                     state_label.Text = "Подключено";
                 }
                 catch (Exception ex)
@@ -111,7 +111,7 @@ namespace DeviceIF
         {
             if (e.KeyCode == Keys.Escape)
             {
-                _device.Close(); 
+                _device.Disconnect(); 
                 this.Close();
             }
         }
@@ -120,7 +120,7 @@ namespace DeviceIF
         {
             if (start_button.Text == "START")
             {
-                if (!_device.IsOpen)
+                if (!_device.IsConnected())
                 {
                     OpenSelectedPort();
                 }
@@ -134,9 +134,6 @@ namespace DeviceIF
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
 
-        }
     }
 }
