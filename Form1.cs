@@ -97,13 +97,18 @@ namespace DeviceIF
 
         private void UpdateSensorData(double value)
         {
-            if (value_label.InvokeRequired)
+            UpdateLabel(value_label, $"Значение датчика: {value}");
+        }
+
+        private void UpdateLabel(Label label, string text)
+        {
+            if (label.InvokeRequired)
             {
-                value_label.Invoke(new Action(() => value_label.Text = $"Значение датчика: {value}"));
+                label.Invoke(new Action(() => label.Text = text));
             }
             else
             {
-                value_label.Text = $"Значение датчика: {value}";
+                label.Text = text;
             }
         }
 
