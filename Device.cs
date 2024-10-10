@@ -5,6 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+//TODO
+//Connection error
+//C# properties
+//Reconnect
+//If the connection is interrupted infinitely, the connection and the button that the infinite disconnection is interrupted
+
+
 namespace DeviceIF
 {
     public class Device
