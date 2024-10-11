@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO.Ports;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-
+using System.Management;
 
 
 namespace DeviceIF
@@ -11,31 +13,43 @@ namespace DeviceIF
     public partial class Form1 : Form
     {
         private Device _device = new Device();
-
+        private bool _isReading = false;
         public Form1()
         {
             InitializeComponent();
             StartPosition = FormStartPosition.CenterScreen;
 
             LoadAvailablePorts();
+            LoadBaudRates();
+
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(Form1_KeyDown);
 
             port_comboBox.SelectedIndexChanged += port_comboBox_SelectedIndexChanged;
             _device.OnDataParsed += OnDeviceDataReceived;
+            _device.PortsNeedRefresh += LoadAvailablePorts;
+
         }
 
-        private void LoadAvailablePorts()
+        protected override void WndProc(ref Message m)
+        {
+            const int WM_DEVICECHANGE = 0x0219;
+            const int DBT_DEVICEARRIVAL = 0x8000;
+            const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
+
+            if (m.Msg == WM_DEVICECHANGE && (m.WParam.ToInt32() == DBT_DEVICEARRIVAL || m.WParam.ToInt32() == DBT_DEVICEREMOVECOMPLETE))
+            {
+                LoadAvailablePorts();
+            }
+
+            base.WndProc(ref m);
+        }
+
+        public void LoadAvailablePorts()
         {
             string[] ports = SerialPort.GetPortNames();
 
             port_comboBox.Items.Clear();
-            Baud_Rate_comboBox.Items.Clear();
-
-            int[] baudRates = { 110, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800 };
-
-            Baud_Rate_comboBox.Items.AddRange(baudRates.Cast<object>().ToArray());
-            Baud_Rate_comboBox.SelectedItem = 115200;
 
             port_comboBox.Items.AddRange(ports);
 
@@ -46,12 +60,26 @@ namespace DeviceIF
             else
             {
                 MessageBox.Show("Нет доступных COM-портов", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                state_label.Text = "Отключено";
+                start_button.Text = "START";
+                LoadAvailablePorts();
+                port_comboBox.Items.Clear();
             }
+        }
+
+        private void LoadBaudRates()
+        {
+            Baud_Rate_comboBox.Items.Clear();
+
+            int[] baudRates = { 110, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800 };
+
+            Baud_Rate_comboBox.Items.AddRange(baudRates.Cast<object>().ToArray());
+            Baud_Rate_comboBox.SelectedItem = 115200;
         }
 
         private void port_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (!_device.IsConnected())
+            if (!_device.Connected)
             {
                 OpenSelectedPort();
             }
@@ -76,7 +104,8 @@ namespace DeviceIF
 
         private void OnDeviceDataReceived(int value)
         {
-            if (start_button.Text == "START") return;
+            if (!_isReading) return;
+
 
             DateTime timeNow = DateTime.Now;
             Invoke(new Action(() =>
@@ -97,18 +126,15 @@ namespace DeviceIF
 
         private void UpdateSensorData(double value)
         {
-            UpdateLabel(value_label, $"Значение датчика: {value}");
-        }
+            string text = $"Значение датчика: {value}";
 
-        private void UpdateLabel(Label label, string text)
-        {
-            if (label.InvokeRequired)
+            if (value_label.InvokeRequired)
             {
-                label.Invoke(new Action(() => label.Text = text));
+                value_label.Invoke(new Action(() => value_label.Text = text));
             }
             else
             {
-                label.Text = text;
+                value_label.Text = text;
             }
         }
 
@@ -123,22 +149,27 @@ namespace DeviceIF
 
         private void start_button_Click(object sender, EventArgs e)
         {
-            if (start_button.Text == "START")
+            if (!_isReading)
             {
-                if (!_device.IsConnected())
+                OpenSelectedPort(); 
+                if (_device.Connected)
                 {
-                    OpenSelectedPort();
+                    start_button.Text = "STOP"; 
+                    state_label.Text = "Подключено";
+                    _isReading = true;
                 }
-                start_button.Text = "STOP";
-                state_label.Text = "Подключено";
+                else
+                {
+                    state_label.Text = "Порт не найден";
+                }
             }
-            else
+            else if (start_button.Text == "STOP" && _device.Connected)
             {
-                start_button.Text = "START";
+                start_button.Text = "START"; 
                 state_label.Text = "Остановлено";
+                _isReading = false;
             }
         }
-
 
     }
 }
