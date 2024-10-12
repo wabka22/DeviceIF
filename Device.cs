@@ -3,24 +3,14 @@ using System.IO.Ports;
 using System.Threading;
 using System.Threading.Tasks;
 
-//TODO
-//Connection error
-//C# properties
-//Reconnect
-//If the connection is interrupted infinitely, the connection and the button that the infinite disconnection is interrupted
-
-
-
-
 namespace DeviceIF
 {
     public class Device
     {
         private SerialPort _serialPort;
         public event Action<int> OnDataParsed;
-        public event Action OnConnectionLost;
-        public event Action PortsNeedRefresh;
         private CancellationTokenSource _cancellationTokenSource;
+        private bool _isMonitoringEnabled = false;
 
         private void HandleDataReceived(object sender, SerialDataReceivedEventArgs eventArgs)
         {
@@ -61,28 +51,33 @@ namespace DeviceIF
             get { return _serialPort != null && _serialPort.IsOpen; }
         }
 
+        public bool IsMonitoringEnabled
+        {
+            get => _isMonitoringEnabled;
+            set => _isMonitoringEnabled = value;
+        }
 
-
-        private async Task MonitorPortsAndConnection(CancellationToken token)
+        public async Task MonitorPortsAndConnection(CancellationToken token)
         {
             while (!token.IsCancellationRequested)
             {
-                if (!Connected)
+                if (_isMonitoringEnabled) 
                 {
-                    PortsNeedRefresh?.Invoke();
-
-                    try
+                    if (!Connected)
                     {
-                        if (_serialPort != null && _serialPort.IsOpen)
+                        try
                         {
-                            Disconnect();
-                        }
+                            if (_serialPort != null && _serialPort.IsOpen)
+                            {
+                                Disconnect();
+                            }
 
-                        Connect(_serialPort?.PortName, _serialPort?.BaudRate ?? 115200); 
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Reconnection failed: {ex.Message}");
+                            Connect(_serialPort?.PortName, _serialPort?.BaudRate ?? 115200);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Reconnection failed: {ex.Message}");
+                        }
                     }
                 }
 

@@ -25,24 +25,8 @@ namespace DeviceIF
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(Form1_KeyDown);
 
-            port_comboBox.SelectedIndexChanged += port_comboBox_SelectedIndexChanged;
+            //port_comboBox.SelectedIndexChanged += port_comboBox_SelectedIndexChanged;
             _device.OnDataParsed += OnDeviceDataReceived;
-            _device.PortsNeedRefresh += LoadAvailablePorts;
-
-        }
-
-        protected override void WndProc(ref Message m)
-        {
-            const int WM_DEVICECHANGE = 0x0219;
-            const int DBT_DEVICEARRIVAL = 0x8000;
-            const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
-
-            if (m.Msg == WM_DEVICECHANGE && (m.WParam.ToInt32() == DBT_DEVICEARRIVAL || m.WParam.ToInt32() == DBT_DEVICEREMOVECOMPLETE))
-            {
-                LoadAvailablePorts();
-            }
-
-            base.WndProc(ref m);
         }
 
         public void LoadAvailablePorts()
@@ -77,13 +61,13 @@ namespace DeviceIF
             Baud_Rate_comboBox.SelectedItem = 115200;
         }
 
-        private void port_comboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (!_device.Connected)
-            {
-                OpenSelectedPort();
-            }
-        }
+        //private void port_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    if (!_device.Connected)
+        //    {
+        //        OpenSelectedPort();
+        //    }
+        //}
 
         private void OpenSelectedPort()
         {
@@ -138,14 +122,7 @@ namespace DeviceIF
             }
         }
 
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Escape)
-            {
-                _device.Disconnect(); 
-                this.Close();
-            }
-        }
+
 
         private void start_button_Click(object sender, EventArgs e)
         {
@@ -163,7 +140,7 @@ namespace DeviceIF
                     state_label.Text = "Порт не найден";
                 }
             }
-            else if (start_button.Text == "STOP" && _device.Connected)
+            else if (_isReading && _device.Connected)
             {
                 start_button.Text = "START"; 
                 state_label.Text = "Остановлено";
@@ -171,5 +148,32 @@ namespace DeviceIF
             }
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (button1.Text == "Disable Connection Check")
+            {
+               
+                _device.IsMonitoringEnabled = false;
+                button1.Text = "Enable Connection Check"; 
+                MessageBox.Show("Connection monitoring disabled.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+            
+                _device.IsMonitoringEnabled=true; 
+                button1.Text = "Disable Connection Check"; 
+                MessageBox.Show("Connection monitoring enabled.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+            {
+                _device.Disconnect();
+                this.Close();
+            }
+        }
     }
 }
