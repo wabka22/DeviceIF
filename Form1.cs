@@ -13,28 +13,36 @@ namespace DeviceIF
     public partial class Form1 : Form
     {
         private Device _device = new Device();
+        private System.Windows.Forms.Timer _portCheckTimer;
         private bool _isReading = false;
         public Form1()
         {
             InitializeComponent();
             StartPosition = FormStartPosition.CenterScreen;
-
-            LoadAvailablePorts();
+            string[] currentPorts = SerialPort.GetPortNames();
+            UpdatePortList(currentPorts);
             LoadBaudRates();
 
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(Form1_KeyDown);
 
-            //port_comboBox.SelectedIndexChanged += port_comboBox_SelectedIndexChanged;
             _device.OnDataParsed += OnDeviceDataReceived;
+            _device.PortsChanged += OnPortsChanged;
+
+            _portCheckTimer = new System.Windows.Forms.Timer();
+            _portCheckTimer.Interval = 1000; 
+            _portCheckTimer.Tick += (sender, e) => _device.CheckPorts();
+            _portCheckTimer.Start();
         }
 
-        public void LoadAvailablePorts()
+        private void OnPortsChanged(string[] ports)
         {
-            string[] ports = SerialPort.GetPortNames();
+            Invoke(new Action(() => UpdatePortList(ports)));
+        }
 
+        private void UpdatePortList(string[] ports)
+        {
             port_comboBox.Items.Clear();
-
             port_comboBox.Items.AddRange(ports);
 
             if (ports.Length > 0)
@@ -43,11 +51,8 @@ namespace DeviceIF
             }
             else
             {
-                MessageBox.Show("Нет доступных COM-портов", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                state_label.Text = "Отключено";
+                state_label.Text = "Нет доступных портов";
                 start_button.Text = "START";
-                LoadAvailablePorts();
-                port_comboBox.Items.Clear();
             }
         }
 
@@ -60,14 +65,6 @@ namespace DeviceIF
             Baud_Rate_comboBox.Items.AddRange(baudRates.Cast<object>().ToArray());
             Baud_Rate_comboBox.SelectedItem = 115200;
         }
-
-        //private void port_comboBox_SelectedIndexChanged(object sender, EventArgs e)
-        //{
-        //    if (!_device.Connected)
-        //    {
-        //        OpenSelectedPort();
-        //    }
-        //}
 
         private void OpenSelectedPort()
         {
@@ -122,8 +119,6 @@ namespace DeviceIF
             }
         }
 
-
-
         private void start_button_Click(object sender, EventArgs e)
         {
             if (!_isReading)
@@ -152,20 +147,15 @@ namespace DeviceIF
         {
             if (button1.Text == "Disable Connection Check")
             {
-               
-                _device.IsMonitoringEnabled = false;
+                _portCheckTimer.Stop();
                 button1.Text = "Enable Connection Check"; 
-                MessageBox.Show("Connection monitoring disabled.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-            
-                _device.IsMonitoringEnabled=true; 
+                _portCheckTimer.Start();
                 button1.Text = "Disable Connection Check"; 
-                MessageBox.Show("Connection monitoring enabled.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
-
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
@@ -176,4 +166,5 @@ namespace DeviceIF
             }
         }
     }
+
 }
