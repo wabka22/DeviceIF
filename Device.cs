@@ -31,9 +31,17 @@ namespace DeviceIF
             string[] currentPorts = SerialPort.GetPortNames();
             Ports = currentPorts;
         }
+
+        private bool _isConnected = false;
+
         public bool Connected
         {
-            get { return _serialPort != null && _serialPort.IsOpen; }
+            get { return _isConnected; }
+            private set
+            {
+                if (value != _isConnected)
+                    _isConnected = value;
+            }
         }
 
         private void HandleDataReceived(object sender, SerialDataReceivedEventArgs eventArgs)
@@ -53,7 +61,16 @@ namespace DeviceIF
 
             _serialPort = new SerialPort(portName) { BaudRate = baudRate };
             _serialPort.DataReceived += HandleDataReceived;
-            _serialPort.Open();
+            try
+            {
+                _serialPort.Open();
+                Connected = true;
+            } 
+            catch(Exception ex)
+            {
+                Connected = false;
+            }
+
         }
 
         public void Disconnect()
@@ -62,6 +79,7 @@ namespace DeviceIF
             {
                 _serialPort.DataReceived -= HandleDataReceived;
                 _serialPort.Close();
+                Connected = false;
             }
         }
 
