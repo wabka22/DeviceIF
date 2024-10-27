@@ -39,7 +39,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.state_label = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
+            this.connection = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -127,23 +127,23 @@
             this.state_label.TabIndex = 8;
             this.state_label.Text = "Неподключено";
             // 
-            // button1
+            // connection
             // 
-            this.button1.Location = new System.Drawing.Point(208, 29);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(154, 82);
-            this.button1.TabIndex = 9;
-            this.button1.TabStop = false;
-            this.button1.Text = "Disable Connection Check";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.connection.Location = new System.Drawing.Point(208, 29);
+            this.connection.Name = "connection";
+            this.connection.Size = new System.Drawing.Size(154, 82);
+            this.connection.TabIndex = 9;
+            this.connection.TabStop = false;
+            this.connection.Text = "Disable Connection Check";
+            this.connection.UseVisualStyleBackColor = true;
+            this.connection.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1406, 745);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.connection);
             this.Controls.Add(this.state_label);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -170,7 +170,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label state_label;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button connection;
     }
 }
 

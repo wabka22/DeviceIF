@@ -65,12 +65,12 @@ namespace DeviceIF
             {
                 _serialPort.Open();
                 Connected = true;
-            } 
-            catch(Exception ex)
+            }
+            catch (Exception ex)
             {
+                Console.WriteLine($"Unexpected error: {ex.Message}");
                 Connected = false;
             }
-
         }
 
         public void Disconnect()

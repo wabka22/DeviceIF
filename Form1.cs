@@ -7,7 +7,6 @@ using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Management;
 
-
 namespace DeviceIF
 {
     public partial class Form1 : Form
@@ -15,6 +14,7 @@ namespace DeviceIF
         private Device _device = new Device();
         private System.Windows.Forms.Timer _portCheckTimer;
         private bool _isReading = false;
+        private string _lastSelectedPort = null;
         public Form1()
         {
             InitializeComponent();
@@ -23,21 +23,40 @@ namespace DeviceIF
             UpdatePortList(currentPorts);
             LoadBaudRates();
 
-            this.KeyPreview = true;
-            this.KeyDown += new KeyEventHandler(Form1_KeyDown);
-
             _device.OnDataParsed += OnDeviceDataReceived;
             _device.PortsChanged += OnPortsChanged;
 
             _portCheckTimer = new System.Windows.Forms.Timer();
             _portCheckTimer.Interval = 1000; 
             _portCheckTimer.Tick += (sender, e) => _device.CheckPorts();
+            _portCheckTimer.Tick += (sender, e) => TryReconnect();
             _portCheckTimer.Start();
+
+            port_comboBox.SelectedIndexChanged += port_comboBox_SelectedIndexChanged;
+        }
+
+        private void port_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!_device.Connected && _portCheckTimer.Enabled)
+            {
+                OpenSelectedPort();
+            }
         }
 
         private void OnPortsChanged(string[] ports)
         {
             Invoke(new Action(() => UpdatePortList(ports)));
+        }
+
+        private void TryReconnect()
+        {
+            if (_device.Connected && !string.IsNullOrEmpty(_lastSelectedPort))
+            {
+                _device.Connect(_lastSelectedPort, (int)Baud_Rate_comboBox.SelectedItem);
+                state_label.Text = "Автоматически переподключено";
+                _isReading = true;
+                start_button.Text = "STOP";
+            }
         }
 
         private void UpdatePortList(string[] ports)
@@ -71,6 +90,7 @@ namespace DeviceIF
             if (port_comboBox.SelectedItem != null)
             {
                 string selectedPort = port_comboBox.SelectedItem.ToString();
+                _lastSelectedPort = selectedPort;
                 try
                 {
                     _device.Connect(selectedPort, (int)Baud_Rate_comboBox.SelectedItem);
@@ -87,8 +107,8 @@ namespace DeviceIF
         {
             if (!_isReading) return;
 
-
             DateTime timeNow = DateTime.Now;
+
             Invoke(new Action(() =>
             {
                 chart1.Series[0].Points.AddXY(timeNow, value);
@@ -97,26 +117,12 @@ namespace DeviceIF
                 chart1.ChartAreas[0].AxisX.Maximum = DateTime.Now.ToOADate();
 
                 chart1.ChartAreas[0].AxisX.IntervalType = DateTimeIntervalType.Seconds;
-                chart1.ChartAreas[0].AxisX.Interval = 5;
+                chart1.ChartAreas[0].AxisX.Interval = 10;
 
                 chart1.ChartAreas[0].AxisX.LabelStyle.Format = "HH:mm:ss";
 
-                UpdateSensorData(value);
+                value_label.Text = $"Значение датчика: {value}";
             }));
-        }
-
-        private void UpdateSensorData(double value)
-        {
-            string text = $"Значение датчика: {value}";
-
-            if (value_label.InvokeRequired)
-            {
-                value_label.Invoke(new Action(() => value_label.Text = text));
-            }
-            else
-            {
-                value_label.Text = text;
-            }
         }
 
         private void start_button_Click(object sender, EventArgs e)
@@ -145,26 +151,18 @@ namespace DeviceIF
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (button1.Text == "Disable Connection Check")
+            if (_portCheckTimer.Enabled)
             {
                 _portCheckTimer.Stop();
-                button1.Text = "Enable Connection Check"; 
+                connection.Text = "Enable Connection Check"; 
             }
             else
             {
                 _portCheckTimer.Start();
-                button1.Text = "Disable Connection Check"; 
+                connection.Text = "Disable Connection Check"; 
             }
         }
 
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Escape)
-            {
-                _device.Disconnect();
-                this.Close();
-            }
-        }
     }
 
 }
