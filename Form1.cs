@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO.Ports;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
-using System.Management;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+using OxyPlot.WindowsForms;
 
 namespace DeviceIF
 {
@@ -15,9 +16,13 @@ namespace DeviceIF
         private System.Windows.Forms.Timer _portCheckTimer;
         private bool _isReading = false;
         private string _lastSelectedPort = null;
+        private PlotView _plotView;
+        private LineSeries _lineSeries;
+
         public Form1()
         {
             InitializeComponent();
+            InitializeChart();
             StartPosition = FormStartPosition.CenterScreen;
             string[] currentPorts = SerialPort.GetPortNames();
             UpdatePortList(currentPorts);
@@ -103,6 +108,46 @@ namespace DeviceIF
             }
         }
 
+        private void InitializeChart()
+        {
+            _plotView = new PlotView
+            {
+                Location = new Point(10, 110),
+                Size = new Size(900, 500)
+            };
+
+            var plotModel = new PlotModel();
+
+            _lineSeries = new LineSeries
+            {
+                Color = OxyColors.Black,
+                StrokeThickness = 1.5,
+            };
+
+            plotModel.Axes.Add(new DateTimeAxis
+            {
+                Position = AxisPosition.Bottom,
+                Title = "Время",
+                IntervalType = DateTimeIntervalType.Seconds,
+                IntervalLength = 50,
+                MajorGridlineStyle = LineStyle.Solid,
+                MinorGridlineStyle = LineStyle.Dot,
+            });
+
+            plotModel.Axes.Add(new LinearAxis
+            {
+                Position = AxisPosition.Left,
+                Title = "Значение",
+                MajorGridlineStyle = LineStyle.Solid,
+                MinorGridlineStyle = LineStyle.Dot,
+            });
+
+            plotModel.Series.Add(_lineSeries);
+
+            _plotView.Model = plotModel;
+            this.Controls.Add(_plotView);
+        }
+
         private void OnDeviceDataReceived(int value)
         {
             if (!_isReading) return;
@@ -115,19 +160,19 @@ namespace DeviceIF
                 value_label.Update();
             }));
 
-            chart1.BeginInvoke(new Action(() =>
+            _plotView.BeginInvoke(new Action(() =>
             {
-                chart1.Series[0].Points.AddXY(timeNow, value);
+                _lineSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(timeNow), value));
 
-                chart1.ChartAreas[0].AxisX.Minimum = DateTime.Now.AddSeconds(-30).ToOADate();
-                chart1.ChartAreas[0].AxisX.Maximum = DateTime.Now.ToOADate();
+                var xAxis = _plotView.Model.Axes.FirstOrDefault(a => a is DateTimeAxis);
+                if (xAxis != null && _isReading)
+                {
+                    xAxis.Minimum = DateTimeAxis.ToDouble(DateTime.Now.AddSeconds(-10));
+                    xAxis.Maximum = DateTimeAxis.ToDouble(DateTime.Now);
+                }
 
-                chart1.ChartAreas[0].AxisX.IntervalType = DateTimeIntervalType.Seconds;
-                chart1.ChartAreas[0].AxisX.Interval = 10;
-
-                chart1.ChartAreas[0].AxisX.LabelStyle.Format = "HH:mm:ss";
+                _plotView.Model.InvalidatePlot(true);
             }));
-
         }
 
         private void start_button_Click(object sender, EventArgs e)
@@ -167,6 +212,7 @@ namespace DeviceIF
                 connection.Text = "Disable Connection Check"; 
             }
         }
+
 
     }
 

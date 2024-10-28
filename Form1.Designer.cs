@@ -28,19 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.start_button = new System.Windows.Forms.Button();
             this.value_label = new System.Windows.Forms.Label();
-            this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.port_comboBox = new System.Windows.Forms.ComboBox();
             this.Baud_Rate_comboBox = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.state_label = new System.Windows.Forms.Label();
             this.connection = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.SuspendLayout();
             // 
             // start_button
@@ -56,30 +51,11 @@
             // value_label
             // 
             this.value_label.AutoSize = true;
-            this.value_label.Location = new System.Drawing.Point(1149, 168);
+            this.value_label.Location = new System.Drawing.Point(1223, 170);
             this.value_label.Name = "value_label";
             this.value_label.Size = new System.Drawing.Size(132, 16);
             this.value_label.TabIndex = 2;
             this.value_label.Text = "Значение датчика:";
-            // 
-            // chart1
-            // 
-            chartArea1.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.chart1.Legends.Add(legend1);
-            this.chart1.Location = new System.Drawing.Point(21, 187);
-            this.chart1.Name = "chart1";
-            series1.BorderWidth = 5;
-            series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
-            series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(192)))));
-            series1.Legend = "Legend1";
-            series1.Name = "Датчик";
-            this.chart1.Series.Add(series1);
-            this.chart1.Size = new System.Drawing.Size(1280, 546);
-            this.chart1.TabIndex = 3;
-            this.chart1.Text = "chart";
             // 
             // port_comboBox
             // 
@@ -121,7 +97,7 @@
             // 
             this.state_label.AutoSize = true;
             this.state_label.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.state_label.Location = new System.Drawing.Point(16, 147);
+            this.state_label.Location = new System.Drawing.Point(368, 29);
             this.state_label.Name = "state_label";
             this.state_label.Size = new System.Drawing.Size(151, 25);
             this.state_label.TabIndex = 8;
@@ -149,12 +125,10 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.Baud_Rate_comboBox);
             this.Controls.Add(this.port_comboBox);
-            this.Controls.Add(this.chart1);
             this.Controls.Add(this.value_label);
             this.Controls.Add(this.start_button);
             this.Name = "Form1";
             this.Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -164,7 +138,6 @@
 
         private System.Windows.Forms.Button start_button;
         private System.Windows.Forms.Label value_label;
-        private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
         private System.Windows.Forms.ComboBox port_comboBox;
         private System.Windows.Forms.ComboBox Baud_Rate_comboBox;
         private System.Windows.Forms.Label label1;
