@@ -109,7 +109,13 @@ namespace DeviceIF
 
             DateTime timeNow = DateTime.Now;
 
-            Invoke(new Action(() =>
+            value_label.BeginInvoke(new Action(() =>
+            {
+                value_label.Text = $"Значение датчика: {value}";
+                value_label.Update();
+            }));
+
+            chart1.BeginInvoke(new Action(() =>
             {
                 chart1.Series[0].Points.AddXY(timeNow, value);
 
@@ -120,9 +126,8 @@ namespace DeviceIF
                 chart1.ChartAreas[0].AxisX.Interval = 10;
 
                 chart1.ChartAreas[0].AxisX.LabelStyle.Format = "HH:mm:ss";
-
-                value_label.Text = $"Значение датчика: {value}";
             }));
+
         }
 
         private void start_button_Click(object sender, EventArgs e)
