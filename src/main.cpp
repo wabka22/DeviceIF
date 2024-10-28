@@ -2,7 +2,7 @@
 
 #include <XSpaceBioV10.h>
 
-const int ad8232Pin = 2;
+const int ad8232Pin = 4;
 
   
 
@@ -21,5 +21,5 @@ int sensorValue = analogRead(ad8232Pin);
 
 Serial.println(sensorValue);
 
-delay(10); 
+delay(2); 
 }
