@@ -1,0 +1,32 @@
+# Visual Studio specific
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+# Build output
+bin/
+obj/
+out/
+
+# NuGet packages
+packages/
+*.nupkg
+*.snupkg
+
+# Windows specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Visual Studio Code
+.vscode/
+
+# Backup & report files
+*.bak
+*.log
+*.pdb
+*.testResults
+*.coverage
+*.coveragexml
