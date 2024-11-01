@@ -22,7 +22,7 @@ namespace DeviceIF
                 if (!_ports.SequenceEqual(value))
                 {
                     _ports = value;
-                    PortsChanged?.Invoke(_ports); 
+                    PortsChanged?.Invoke(_ports);
                 }
             }
         }

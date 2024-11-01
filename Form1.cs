@@ -14,6 +14,7 @@ namespace DeviceIF
     {
         private Device _device = new Device();
         private System.Windows.Forms.Timer _portCheckTimer;
+        private Filter filter;
         private bool _isReading = false;
         private string _lastSelectedPort = null;
         private PlotView _plotView;
@@ -28,11 +29,13 @@ namespace DeviceIF
             UpdatePortList(currentPorts);
             LoadBaudRates();
 
+            filter = new Filter(1000.0);
+
             _device.OnDataParsed += OnDeviceDataReceived;
             _device.PortsChanged += OnPortsChanged;
 
             _portCheckTimer = new System.Windows.Forms.Timer();
-            _portCheckTimer.Interval = 1000; 
+            _portCheckTimer.Interval = 1000;
             _portCheckTimer.Tick += (sender, e) => _device.CheckPorts();
             _portCheckTimer.Tick += (sender, e) => TryReconnect();
             _portCheckTimer.Start();
@@ -152,10 +155,12 @@ namespace DeviceIF
         {
             if (!_isReading) return;
 
+            double filteredValue = filter.ApplyFilter(value);
             DateTime timeNow = DateTime.Now;
 
             value_label.BeginInvoke(new Action(() =>
             {
+                Console.WriteLine(filteredValue);
                 value_label.Text = $"Значение датчика: {value}";
                 value_label.Update();
             }));
@@ -167,7 +172,7 @@ namespace DeviceIF
                 var xAxis = _plotView.Model.Axes.FirstOrDefault(a => a is DateTimeAxis);
                 if (xAxis != null && _isReading)
                 {
-                    xAxis.Minimum = DateTimeAxis.ToDouble(DateTime.Now.AddSeconds(-10));
+                    xAxis.Minimum = DateTimeAxis.ToDouble(DateTime.Now.AddSeconds(-3));
                     xAxis.Maximum = DateTimeAxis.ToDouble(DateTime.Now);
                 }
 
@@ -179,10 +184,10 @@ namespace DeviceIF
         {
             if (!_isReading)
             {
-                OpenSelectedPort(); 
+                OpenSelectedPort();
                 if (_device.Connected)
                 {
-                    start_button.Text = "STOP"; 
+                    start_button.Text = "STOP";
                     state_label.Text = "Подключено";
                     _isReading = true;
                 }
@@ -193,7 +198,7 @@ namespace DeviceIF
             }
             else if (_isReading && _device.Connected)
             {
-                start_button.Text = "START"; 
+                start_button.Text = "START";
                 state_label.Text = "Остановлено";
                 _isReading = false;
             }
@@ -204,12 +209,12 @@ namespace DeviceIF
             if (_portCheckTimer.Enabled)
             {
                 _portCheckTimer.Stop();
-                connection.Text = "Enable Connection Check"; 
+                connection.Text = "Enable Connection Check";
             }
             else
             {
                 _portCheckTimer.Start();
-                connection.Text = "Disable Connection Check"; 
+                connection.Text = "Disable Connection Check";
             }
         }
 
