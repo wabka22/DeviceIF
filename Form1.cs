@@ -148,6 +148,12 @@ namespace DeviceIF
             this.Controls.Add(_plotView);
         }
 
+        private void ClearAndRedrawChart()
+        {
+            _lineSeries.Points.Clear();
+            _plotView.Model.InvalidatePlot(true);
+        }
+
         private void OnDeviceDataReceived(int value)
         {
             if (!_isReading) return;
@@ -196,6 +202,7 @@ namespace DeviceIF
                 start_button.Text = "START"; 
                 state_label.Text = "Остановлено";
                 _isReading = false;
+                 ClearAndRedrawChart();
             }
         }
 
