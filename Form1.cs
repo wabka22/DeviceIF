@@ -207,11 +207,8 @@ namespace DeviceIF
                 start_button.Text = "START";
                 state_label.Text = "Остановлено";
                 _isReading = false;
-<<<<<<< HEAD
+
                  ClearAndRedrawChart();
-=======
-                ClearAndRedrawChart();
->>>>>>> filter
             }
         }
 

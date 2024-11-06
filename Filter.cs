@@ -6,52 +6,50 @@ using System.Collections.Generic;
 using MathNet.Filtering;
 using MathNet.Filtering.IIR;
 
-// фильтр Баттерворта
 public class Filter
 {
-    private readonly double[] butterworthGain;
-    private readonly int N;
-    private readonly Complex[] fftSignal;
+    private double[] butterworthCoefficients;
+    private int FFT_size;
+    private Complex[] fftSignal;
 
-    public Filter(double lowCut = 45.0, double highCut = 55.0, double fs = 250.0, int n = 1024)
+    public Filter(double lowCut = 45.0, double highCut = 55.0, double frequency = 250.0, int n = 1024)
     {
-        N = n;
-        butterworthGain = new double[N / 2];
-        fftSignal = new Complex[N];
-        InitializeButterworthGain(lowCut, highCut, fs);
+        FFT_size = n;
+        butterworthCoefficients = new double[FFT_size / 2];
+        fftSignal = new Complex[FFT_size];
+        InitializeButterworthGain(lowCut, highCut, frequency);
     }
 
     private void InitializeButterworthGain(double lowCut, double highCut, double fs)
     {
-        // Вычисляем усиление для каждой частоты в зависимости от ее близости к границам диапазона
-        for (int i = 0; i < N / 2; i++)
+        for (int i = 0; i < FFT_size / 2; i++)
         {
-            double frequency = i * fs / N;
+            double frequency = i * fs / FFT_size;
             if (frequency < lowCut || frequency > highCut)
-                butterworthGain[i] = 0;
+                butterworthCoefficients[i] = 0;
             else
                 // Применяем формулу Баттерворта
-                butterworthGain[i] = 1 / Math.Sqrt(1 + Math.Pow((frequency - (highCut + lowCut) / 2) / ((highCut - lowCut) / 2), 4));
+                butterworthCoefficients[i] = 1 / Math.Sqrt(1 + Math.Pow((frequency - (highCut + lowCut) / 2) / ((highCut - lowCut) / 2), 4));
         }
     }
 
     public double ApplyFilter(double data)
     {
         // Перемещаем старые значения для создания кольцевого буфера
-        for (int i = 0; i < N - 1; i++)
+        for (int i = 0; i < FFT_size - 1; i++)
         {
             fftSignal[i] = fftSignal[i + 1];
         }
-        fftSignal[N - 1] = new Complex(data, 0);
+        fftSignal[FFT_size - 1] = new Complex(data, 0);
 
         // Прямое FFT-преобразование
         Fourier.Forward(fftSignal, FourierOptions.Default);
 
         // Применяем коэффициенты усиления Баттерворта к каждой частоте
-        for (int w = 0; w < N / 2; w++)
+        for (int w = 0; w < FFT_size / 2; w++)
         {
-            fftSignal[w] *= butterworthGain[w];
-            fftSignal[N - w - 1] *= butterworthGain[w]; // Симметрия для зеркальной части спектра
+            fftSignal[w] *= butterworthCoefficients[w];
+            fftSignal[FFT_size - w - 1] *= butterworthCoefficients[w]; // Симметрия для зеркальной части спектра
         }
 
         // Обратное FFT-преобразование
@@ -61,7 +59,6 @@ public class Filter
         return fftSignal[0].Real;
     }
 }
-
 
 //public class Filter2
 //{
