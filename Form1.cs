@@ -7,6 +7,7 @@ using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using OxyPlot.WindowsForms;
+using System.Windows.Markup;
 
 namespace DeviceIF
 {
@@ -14,7 +15,7 @@ namespace DeviceIF
     {
         private Device _device = new Device();
         private System.Windows.Forms.Timer _portCheckTimer;
-        private Filter filter;
+        private NotchFilter filter;
         private bool _isReading = false;
         private string _lastSelectedPort = null;
         private PlotView _plotView;
@@ -29,8 +30,7 @@ namespace DeviceIF
             UpdatePortList(currentPorts);
             LoadBaudRates();
 
-            filter = new Filter(1000.0);
-
+             filter = new NotchFilter(50.0);
             _device.OnDataParsed += OnDeviceDataReceived;
             _device.PortsChanged += OnPortsChanged;
 
@@ -161,7 +161,7 @@ namespace DeviceIF
         {
             if (!_isReading) return;
 
-            double filteredValue = filter.ApplyFilter(value);
+            double filteredValue = filter.Apply(value);
             DateTime timeNow = DateTime.Now;
 
             value_label.BeginInvoke(new Action(() =>
