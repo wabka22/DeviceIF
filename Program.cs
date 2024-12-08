@@ -17,23 +17,5 @@ namespace DeviceIF
             Application.Run(new Form1());
         }
 
-
-        //static void Main(string[] args)
-        //{
-        //    double frequency = 50.0;
-        //    double discretization = 500.0;
-        //    int count = 100;
-
-        //    double[] signal = SignalGenerator.GenerateSinSignal(frequency, discretization, count);
-
-        //    NotchFilter notchFilter = new NotchFilter(frequency);
-        //    double[] filteredSignal = new double[count];
-
-        //    for (int i = 0; i < count; i++)
-        //    {
-        //        filteredSignal[i] = notchFilter.Apply(signal[i]);
-        //        Console.WriteLine($"Original: {signal[i]}, Filtered: {filteredSignal[i]}");
-        //    }
-        //}
     }
 }

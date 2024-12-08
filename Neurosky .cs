@@ -1,32 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Neurosky;
+using NeuroSky.ThinkGear;
 
-internal class Neurosky
+class Program
 {
-    private ThinkGearClient _client;
-
-    public void Connect(string port)
+    static void Main(string[] args)
     {
-        _client = new ThinkGearClient();
-        _client.Connect(port);
-        _client.OnDataReceived += Client_OnDataReceived;
-    }
+        ThinkGearClient client = new ThinkGearClient();
 
-    private void Client_OnDataReceived(object sender, ThinkGearDataEventArgs e)
-    {
-        Console.WriteLine($"Attention: {e.Attention}, Meditation: {e.Meditation}");
-    }
-
-    public void Disconnect()
-    {
-        if (_client != null)
+        try
         {
-            _client.Disconnect();
-            _client = null;
+            // Подключение к устройству
+            client.Connect("COM5");
+            client.OnDataReceived += (sender, e) =>
+            {
+                Console.WriteLine($"Attention: {e.Attention}, Meditation: {e.Meditation}");
+            };
+
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            client.Disconnect();
         }
     }
 }
