@@ -57,7 +57,7 @@ namespace ConsoleApp1
                 client = new TcpClient("127.0.0.1", 13854);
                 stream = client.GetStream();
 
-                Console.WriteLine("Sending configuration packet to device.");
+                Console.WriteLine("Sending configuration packet to device.");              
                 if (stream.CanWrite)
                     stream.Write(myWriteBuffer, 0, myWriteBuffer.Length);
 
@@ -85,8 +85,8 @@ namespace ConsoleApp1
 
                 if (stream.CanRead)
                 {
-
-
+                    
+                  
 
                     //to check if device is ready
                     var ready = false;
@@ -102,7 +102,7 @@ namespace ConsoleApp1
                     while (true)
                     {
                         bytesRead = stream.Read(buffer, 0, 4096);
-
+                        
 
                         string[] packets = Encoding.UTF8.GetString(buffer, 0, bytesRead).Split('\r');
                         foreach (string s in packets)
@@ -116,15 +116,15 @@ namespace ConsoleApp1
                                 //Check if device is ON/OFF
                                 if (data.ContainsKey("status"))
                                 {
-
+                                    
                                     Console.WriteLine("Device is Off.");
                                     ready = false;
                                     break;
                                 }
 
                                 //Check fitting (device on head or not)
-                                if (data.ContainsKey("eSense"))
-                                    if (data["eSense"].ToString() == "{\"attention\":0,\"meditation\":0}")
+                                if(data.ContainsKey("eSense"))
+                                    if(data["eSense"].ToString() == "{\"attention\":0,\"meditation\":0}")
                                     {
                                         Console.WriteLine("Check fitting.");
                                         ready = false;
@@ -132,25 +132,25 @@ namespace ConsoleApp1
                                     }
 
                                 //check if device is ready
-                                if ((data.ContainsKey("eSense")) && (ready == false))
+                                if((data.ContainsKey("eSense")) && (ready == false))
                                 {
-                                    IDictionary d = (IDictionary)data["eSense"];
+                                    IDictionary d = (IDictionary) data["eSense"];
                                     if ((d["attention"].ToString() != "0") && (d["meditation"].ToString() != "0"))
                                     {
                                         ready = true;
                                         Console.WriteLine("Device is ready.");
-                                        // Console.WriteLine("Enter F for FORWARD, B for BACKWARD, L for LEFT, R for RIGHT, S for STOP and CTRL + C to close readings");
+                                       // Console.WriteLine("Enter F for FORWARD, B for BACKWARD, L for LEFT, R for RIGHT, S for STOP and CTRL + C to close readings");
                                     }
                                 }
 
                                 //start data reading only when device is ready.
-                                if (ready)
+                                if(ready)
                                 {
                                     if (Console.KeyAvailable == true)
                                     {
                                         startRead = true;
                                         key = Console.ReadKey(true);
-
+                                        
                                         break;
                                     }
 
@@ -161,11 +161,11 @@ namespace ConsoleApp1
                                         switch (key.Key)
                                         {
                                             case ConsoleKey.F:
-                                                // Console.WriteLine("F readings...");
+                                               // Console.WriteLine("F readings...");
                                                 if (option.ToString() == "1")
                                                 {
                                                     eSense = (IDictionary)data["eSense"];
-                                                    eegPower = (IDictionary)data["eegPower"];
+                                                    eegPower = (IDictionary)data["eegPower"];                                                
 
                                                     eegdata.WriteLine(eSense["attention"].ToString() + "," + eSense["meditation"].ToString() + "," + eegPower["" +
                                                         "delta"].ToString() + "," + eegPower["theta"].ToString() + "," + eegPower["lowAlpha"].ToString() + "," + eegPower["highAlpha"].ToString() + ","
@@ -217,8 +217,8 @@ namespace ConsoleApp1
                                                 }
                                                 else
                                                     rawdata.WriteLine(data["rawEeg"].ToString() + ",3");//3 for Right
-
-
+                                                
+                                                
                                                 break;
                                             case ConsoleKey.S:
                                                 //Console.WriteLine("S readings...");
@@ -233,23 +233,23 @@ namespace ConsoleApp1
                                                 }
                                                 else
                                                     rawdata.WriteLine(data["rawEeg"].ToString() + ",4");//4 for Stop
-
-
+                                                
+                                                
                                                 break;
-
+                                           
                                             default:
-                                                //  Console.WriteLine("Wrong key");
+                                              //  Console.WriteLine("Wrong key");
                                                 startRead = false;
                                                 break;
                                         }
                                     }
                                 }
                             }
-                            catch (Exception e)
+                            catch(Exception e)
                             {
                             }
                         }
-                    }
+                    }                   
                 }
                 System.Threading.Thread.Sleep(500);
                 client.Close();
@@ -257,13 +257,13 @@ namespace ConsoleApp1
             catch (SocketException se)
             {
                 Console.WriteLine("Error in data collection.");
-            }
+            }        
         }
 
         public static void saveData(object sender, ConsoleCancelEventArgs args)
-        {
+        { 
             Console.WriteLine("Step 3 completed!!!");
-
+            
             try
             {
                 Console.WriteLine("Saving data to csv file.");
@@ -280,7 +280,7 @@ namespace ConsoleApp1
                 Console.WriteLine("Error in data saving.");
             }
 
-
+            
         }
-    }
+    } 
 }
