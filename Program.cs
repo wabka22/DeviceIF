@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace DeviceIF
 {
-/*    internal static class Program
+    internal static class Program
     {
         [STAThread]
         static void Main()
@@ -17,5 +17,5 @@ namespace DeviceIF
             Application.Run(new Form1());
         }
 
-    }*/
+    }
 }

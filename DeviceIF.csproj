@@ -138,20 +138,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="ThinkGearNET_Extras\docs\NeuroSky_License_Agreement.pdf" />
-    <None Include="ThinkGearNET_Extras\samples.zip" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="ThinkGearNET_Extras\docs\copyright.txt" />
-    <Content Include="ThinkGearNET_Extras\docs\license.txt" />
-    <Content Include="ThinkGearNET_Extras\thinkgear.dll" />
-    <Content Include="ThinkGearNET_ReadMe.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

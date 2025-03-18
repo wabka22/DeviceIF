@@ -1,32 +1,49 @@
-# Visual Studio specific
+# Visual Studio папки
 .vs/
-*.user
 *.suo
-*.sln.docstates
+*.user
+*.vcxproj.user
+*.db
+*.opendb
 
-# Build output
+# Папки сборки
 bin/
 obj/
-out/
 
-# NuGet packages
+# NuGet-пакеты
 packages/
 *.nupkg
-*.snupkg
+project.lock.json
+project.assets.json
 
-# Windows specific
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# Visual Studio Code
-.vscode/
-
-# Backup & report files
-*.bak
-*.log
+# Конфигурационные файлы
 *.pdb
-*.testResults
+*.log
+*.cache
+*.config
+
+# Резервные файлы
+*.bak
+*.tmp
+
+# Файлы, сгенерированные сборкой
+*.dll
+*.exe
+*.so
+*.dylib
+*.app
+
+# Rider / JetBrains
+.idea/
+*.iml
+
+# Тестовые результаты
+TestResults/
+*.trx
 *.coverage
-*.coveragexml
+.coverage/
+
+# Файлы ОС
+.DS_Store
+Thumbs.db
+desktop.ini
