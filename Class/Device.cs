@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DeviceIF
 {
-    public class Device: IDataDevice
+    public class Device
     {
         private SerialPort _serialPort;
         public event Action<int> OnDataParsed;

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace DeviceIF
 {
-    public class Neurosky : IDataDevice
+    public class Neurosky : Device
     {
         private SerialPort _serialPort;
         public event Action<int> OnDataParsed;

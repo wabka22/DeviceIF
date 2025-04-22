@@ -7,13 +7,13 @@ using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using OxyPlot.WindowsForms;
-using System.Windows.Markup;
 
 namespace DeviceIF
 {
     public partial class Form1 : Form
     {
         private Device _device = new Device();
+        private Neurosky _neurosky = new Neurosky();
         private System.Windows.Forms.Timer _portCheckTimer;
         private NotchFilter filter;
         private bool _isReading = false;
@@ -31,6 +31,10 @@ namespace DeviceIF
             LoadBaudRates();
 
              filter = new NotchFilter(50.0);
+
+            if (true) { //?????????????????????????????????
+                _device = _neurosky;
+            }
             _device.OnDataParsed += OnDeviceDataReceived;
             _device.PortsChanged += OnPortsChanged;
 

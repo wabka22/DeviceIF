@@ -120,7 +120,6 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Class\IDataDevice.cs" />
     <Compile Include="Class\Neurosky .cs" />
     <Compile Include="Class\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
