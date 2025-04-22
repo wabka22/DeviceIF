@@ -112,17 +112,17 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Device.cs" />
-    <Compile Include="Filter.cs" />
+    <Compile Include="Class\Device.cs" />
+    <Compile Include="Class\Filter.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="IDataDevice.cs" />
-    <Compile Include="Neurosky .cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Class\IDataDevice.cs" />
+    <Compile Include="Class\Neurosky .cs" />
+    <Compile Include="Class\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
