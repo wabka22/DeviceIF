@@ -114,16 +114,16 @@
   <ItemGroup>
     <Compile Include="Class\Device.cs" />
     <Compile Include="Class\Filter.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="Class\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
+    <Compile Include="Class\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Class\Neurosky .cs" />
     <Compile Include="Class\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
+    <EmbeddedResource Include="Class\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
