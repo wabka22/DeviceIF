@@ -2,33 +2,27 @@ root = true
 
 [*.cs]
 
-# Отступы
 indent_size = 4
 indent_style = space
 tab_width = 4
 
-# Скобки
 csharp_new_line_before_open_brace = all
 csharp_new_line_before_else = true
 csharp_new_line_between_query_expression_clauses = true
 
-# Пробелы
 csharp_space_around_operators = before_and_after
 csharp_space_after_keywords_in_control_flow_statements = true
 csharp_space_between_method_call_parameter_list_parentheses = false
 
-# var
 csharp_style_var_when_type_is_evident = true:suggestion
 csharp_style_var_for_built_in_types = false:suggestion
 
-# Лямбды
 csharp_style_expression_bodied_methods = when_on_single_line:suggestion
 csharp_style_expression_bodied_lambdas = when_on_single_line:suggestion
 
 # using
 csharp_using_directive_placement = outside_namespace:suggestion
 
-# Именование
 dotnet_naming_rule.private_fields_should_be__lower_case.symbols = private_fields
 dotnet_naming_rule.private_fields_should_be__lower_case.style = camel_case
 dotnet_naming_rule.non_private_fields_should_be_pascal_case.symbols = non_private_fields

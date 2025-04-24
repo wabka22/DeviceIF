@@ -25,22 +25,29 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1
 
+    - name: Cache NuGet packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.nuget/packages
+          $(Build.SourcesDirectory)/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.config') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
     - name: Restore NuGet packages
-      run: dotnet restore DeviceIF.sln
+      run: |
+        dotnet restore DeviceIF.sln --force-evaluate || nuget restore DeviceIF.sln -PackagesDirectory packages
 
     - name: Build solution
-      run: msbuild DeviceIF.sln /p:Configuration=${{ matrix.configuration }} /p:Platform="Any CPU" /p:WarningLevel=4 /clp:summary
+      run: |
+        msbuild DeviceIF.sln /p:Configuration=${{ matrix.configuration }} /p:Platform="Any CPU" /p:WarningLevel=4 /p:RestorePackages=true /clp:summary
 
     - name: Run Code Analysis
       continue-on-error: true
       run: |
         dotnet format --verify-no-changes --severity warn --report "code-style-report.json"
-        msbuild DeviceIF.sln /p:Configuration=${{ matrix.configuration }} `
-          /p:RunAnalyzers=true `
-          /p:AnalysisMode=AllEnabledByDefault `
-          /p:WarningLevel=4 `
-          /p:TreatWarningsAsErrors=false `
-          /clp:"summary;errorsonly"
+        msbuild DeviceIF.sln /p:Configuration=${{ matrix.configuration }} /p:RunAnalyzers=true /p:AnalysisMode=AllEnabledByDefault /p:WarningLevel=4 /p:TreatWarningsAsErrors=false /clp:"summary;errorsonly"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -48,6 +55,17 @@ jobs:
         name: build-artifacts-${{ matrix.configuration }}
         path: |
           bin/${{ matrix.configuration }}
+          obj/${{ matrix.configuration }}
           *.md
           *.json
           **/*CodeAnalysisLog.txt
+          **/*.binlog
+
+    - name: Analyze warnings
+      if: always()
+      run: |
+        $warnings = Select-String -Path "**/*.log","**/*.binlog" -Pattern "warning\s+:"
+        if ($warnings) {
+          $report = "## Code Analysis Warnings`n`n" + ($warnings | ForEach-Object { "**File**: $($_.Filename):$($_.LineNumber)`n`n$($_.Line)`n`n---`n" }) -join "`n"
+          Add-Content -Path "analysis-report.md" -Value $report
+        }
