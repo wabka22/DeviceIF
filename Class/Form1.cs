@@ -24,6 +24,7 @@ namespace DeviceIF
         public Form1()
         {
             InitializeComponent();
+            InitializeDeviceTypeComboBox();
             InitializeChart();
             StartPosition = FormStartPosition.CenterScreen;
             string[] currentPorts = SerialPort.GetPortNames();
@@ -32,9 +33,6 @@ namespace DeviceIF
 
              filter = new NotchFilter(50.0);
 
-            if (true) { //?????????????????????????????????
-                _device = _neurosky;
-            }
             _device.OnDataParsed += OnDeviceDataReceived;
             _device.PortsChanged += OnPortsChanged;
 
@@ -52,6 +50,44 @@ namespace DeviceIF
             if (!_device.Connected && _portCheckTimer.Enabled)
             {
                 OpenSelectedPort();
+            }
+        }
+
+        private void InitializeDeviceTypeComboBox()
+        {
+
+            deviceComboBox.Items.AddRange(new object[] { "Arduino", "ESP-32", "Neurosky" });
+            deviceComboBox.SelectedIndex = 1;
+            deviceComboBox.SelectedIndexChanged += DeviceTypeComboBox_SelectedIndexChanged;
+
+            this.Controls.Add(deviceComboBox);
+
+        }
+
+        private void DeviceTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_device != null && _device.Connected)
+            {
+                _device.Disconnect();
+            }
+
+            if (deviceComboBox.SelectedItem.ToString() == "Neurosky") {
+                _device = _neurosky;
+            }
+
+            _device.OnDataParsed += OnDeviceDataReceived;
+            _device.PortsChanged += OnPortsChanged;
+
+            if (!string.IsNullOrEmpty(_lastSelectedPort))
+            {
+                try
+                {
+                    _device.Connect(_lastSelectedPort, (int)Baud_Rate_comboBox.SelectedItem);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка подключения: {ex.Message}");
+                }
             }
         }
 
@@ -229,7 +265,6 @@ namespace DeviceIF
                 connection.Text = "Disable Connection Check";
             }
         }
-
 
     }
 

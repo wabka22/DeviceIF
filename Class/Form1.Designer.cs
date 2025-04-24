@@ -36,6 +36,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.state_label = new System.Windows.Forms.Label();
             this.connection = new System.Windows.Forms.Button();
+            this.deviceComboBox = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // start_button
@@ -51,7 +53,7 @@
             // value_label
             // 
             this.value_label.AutoSize = true;
-            this.value_label.Location = new System.Drawing.Point(1223, 170);
+            this.value_label.Location = new System.Drawing.Point(1196, 193);
             this.value_label.Name = "value_label";
             this.value_label.Size = new System.Drawing.Size(132, 16);
             this.value_label.TabIndex = 2;
@@ -60,15 +62,15 @@
             // port_comboBox
             // 
             this.port_comboBox.FormattingEnabled = true;
-            this.port_comboBox.Location = new System.Drawing.Point(1199, 21);
+            this.port_comboBox.Location = new System.Drawing.Point(1207, 69);
             this.port_comboBox.Name = "port_comboBox";
-            this.port_comboBox.Size = new System.Drawing.Size(156, 24);
+            this.port_comboBox.Size = new System.Drawing.Size(121, 24);
             this.port_comboBox.TabIndex = 4;
             // 
             // Baud_Rate_comboBox
             // 
             this.Baud_Rate_comboBox.FormattingEnabled = true;
-            this.Baud_Rate_comboBox.Location = new System.Drawing.Point(1199, 87);
+            this.Baud_Rate_comboBox.Location = new System.Drawing.Point(1207, 117);
             this.Baud_Rate_comboBox.Name = "Baud_Rate_comboBox";
             this.Baud_Rate_comboBox.Size = new System.Drawing.Size(121, 24);
             this.Baud_Rate_comboBox.TabIndex = 5;
@@ -77,7 +79,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.label1.Location = new System.Drawing.Point(1082, 21);
+            this.label1.Location = new System.Drawing.Point(1082, 73);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(45, 20);
             this.label1.TabIndex = 6;
@@ -87,7 +89,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.label2.Location = new System.Drawing.Point(1082, 91);
+            this.label2.Location = new System.Drawing.Point(1082, 121);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(93, 20);
             this.label2.TabIndex = 7;
@@ -114,11 +116,31 @@
             this.connection.UseVisualStyleBackColor = true;
             this.connection.Click += new System.EventHandler(this.button1_Click);
             // 
+            // deviceComboBox
+            // 
+            this.deviceComboBox.FormattingEnabled = true;
+            this.deviceComboBox.Location = new System.Drawing.Point(1207, 21);
+            this.deviceComboBox.Name = "deviceComboBox";
+            this.deviceComboBox.Size = new System.Drawing.Size(121, 24);
+            this.deviceComboBox.TabIndex = 10;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.label3.Location = new System.Drawing.Point(1082, 25);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(66, 20);
+            this.label3.TabIndex = 11;
+            this.label3.Text = "Device:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1406, 745);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.deviceComboBox);
             this.Controls.Add(this.connection);
             this.Controls.Add(this.state_label);
             this.Controls.Add(this.label2);
@@ -144,6 +166,8 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label state_label;
         private System.Windows.Forms.Button connection;
+        private System.Windows.Forms.ComboBox deviceComboBox;
+        private System.Windows.Forms.Label label3;
     }
 }
 
