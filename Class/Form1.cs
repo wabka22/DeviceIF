@@ -31,7 +31,7 @@ namespace DeviceIF
             UpdatePortList(currentPorts);
             LoadBaudRates();
 
-             filter = new NotchFilter(50.0);
+            filter = new NotchFilter(50.0);
 
             _device.OnDataParsed += OnDeviceDataReceived;
             _device.PortsChanged += OnPortsChanged;
@@ -71,7 +71,8 @@ namespace DeviceIF
                 _device.Disconnect();
             }
 
-            if (deviceComboBox.SelectedItem.ToString() == "Neurosky") {
+            if (deviceComboBox.SelectedItem.ToString() == "Neurosky")
+            {
                 _device = _neurosky;
             }
 
@@ -248,7 +249,7 @@ namespace DeviceIF
                 state_label.Text = "Остановлено";
                 _isReading = false;
 
-                 ClearAndRedrawChart();
+                ClearAndRedrawChart();
             }
         }
 
