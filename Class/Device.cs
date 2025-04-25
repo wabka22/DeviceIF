@@ -9,10 +9,10 @@ namespace DeviceIF
 {
     public class Device
     {
-        private SerialPort _serialPort;
+        public SerialPort _serialPort;
         public event Action<int> OnDataParsed;
         public event Action<string[]> PortsChanged;
-        private string[] _ports = SerialPort.GetPortNames();
+        public string[] _ports = SerialPort.GetPortNames();
 
         public string[] Ports
         {
@@ -32,19 +32,9 @@ namespace DeviceIF
             Ports = currentPorts;
         }
 
-        private bool _isConnected = false;
+        public bool Connected { get; protected set; }
 
-        public bool Connected
-        {
-            get { return _isConnected; }
-            private set
-            {
-                if (value != _isConnected)
-                    _isConnected = value;
-            }
-        }
-
-        private void HandleDataReceived(object sender, SerialDataReceivedEventArgs eventArgs)
+        protected virtual void HandleDataReceived(object sender, SerialDataReceivedEventArgs eventArgs)
         {
             string receivedData = _serialPort.ReadLine();
             Console.WriteLine($"Received Data: {receivedData}");
@@ -55,7 +45,7 @@ namespace DeviceIF
             }
         }
 
-        public void Connect(string portName, int baudRate)
+        public virtual void Connect(string portName, int baudRate)
         {
             if (_serialPort != null && _serialPort.IsOpen) _serialPort.Close();
 
@@ -73,7 +63,7 @@ namespace DeviceIF
             }
         }
 
-        public void Disconnect()
+        public virtual void Disconnect()
         {
             if (_serialPort != null && _serialPort.IsOpen)
             {

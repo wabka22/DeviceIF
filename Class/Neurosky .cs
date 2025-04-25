@@ -6,152 +6,106 @@ namespace DeviceIF
 {
     public class Neurosky : Device
     {
-        private SerialPort _serialPort;
-        public event Action<int> OnDataParsed;
-        public event Action<string[]> PortsChanged;
-
-        private string[] _ports = SerialPort.GetPortNames();
-        public string[] Ports
+        public override void Connect(string portName, int baudRate)
         {
-            get => _ports;
-            set
+            base.Connect(portName, baudRate);
+
+            if (Connected)
             {
-                if (!_ports.SequenceEqual(value))
+                byte[] request = { 0xAA };
+                try
                 {
-                    _ports = value;
-                    PortsChanged?.Invoke(_ports);
+                    _serialPort.Write(request, 0, request.Length);
+                    Console.WriteLine("Neurosky data request sent.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Failed to send Neurosky request: " + ex.Message);
                 }
             }
         }
 
-        public bool Connected { get; private set; }
-
-        public void CheckPorts()
-        {
-            Ports = SerialPort.GetPortNames();
-        }
-
-        public void Connect(string portName, int baudRate)
-        {
-            _serialPort = new SerialPort(portName, 57600);
-            _serialPort.DataReceived += SerialPort_DataReceived;
-
-            try
-            {
-                _serialPort.Open();
-                Connected = true;
-                RequestData();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Connection error: {ex.Message}");
-                Connected = false;
-            }
-        }
-
-        public void Disconnect()
-        {
-            if (_serialPort?.IsOpen ?? false)
-            {
-                _serialPort.DataReceived -= SerialPort_DataReceived;
-                _serialPort.Close();
-                Connected = false;
-            }
-        }
-
-        private void RequestData()
-        {
-            byte[] request = new byte[] { 0xAA };
-            try
-            {
-                _serialPort.Write(request, 0, request.Length);
-                Console.WriteLine("Data request sent.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Failed to send request: " + ex.Message);
-            }
-        }
-
-        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        protected override void HandleDataReceived(object sender, SerialDataReceivedEventArgs eventArgs)
         {
             var sp = (SerialPort)sender;
             byte[] buffer = new byte[sp.BytesToRead];
             sp.Read(buffer, 0, buffer.Length);
-            ParseThinkGearStream(buffer);
-        }
 
-        private void ParseThinkGearStream(byte[] data)
-        {
-            for (int i = 0; i < data.Length; i++)
+            for (int i = 0; i < buffer.Length; i++)
             {
-                byte code = data[i];
+                byte code = buffer[i];
 
                 switch (code)
                 {
-                    case 0x02: // Poor signal
-                        if (i + 1 < data.Length)
+                    case 0x02: // Poor signal (0-255)
+                        if (i + 1 < buffer.Length)
                         {
-                            Console.WriteLine($"[SIGNAL] POOR_SIGNAL: {data[i + 1]}");
+                            int poorSignal = buffer[i + 1];
+                            Console.WriteLine($"[SIGNAL] POOR_SIGNAL: {poorSignal}");
                             i++;
                         }
                         break;
 
-                    case 0x04: // Attention
-                        if (i + 1 < data.Length)
+                    case 0x04: // Attention eSense (0-100)
+                        if (i + 1 < buffer.Length)
                         {
-                            int attention = data[i + 1];
+                            int attention = buffer[i + 1];
                             Console.WriteLine($"[eSense] ATTENTION: {attention}");
-                            OnDataParsed?.Invoke(attention);
+                            //OnDataParsed?.Invoke(attention); // Отправляем данные через событие
                             i++;
                         }
                         break;
 
-                    case 0x05: // Meditation
-                        if (i + 1 < data.Length)
+                    case 0x05: // Meditation eSense (0-100)
+                        if (i + 1 < buffer.Length)
                         {
-                            Console.WriteLine($"[eSense] MEDITATION: {data[i + 1]}");
+                            int meditation = buffer[i + 1];
+                            Console.WriteLine($"[eSense] MEDITATION: {meditation}");
                             i++;
                         }
                         break;
 
-                    case 0x03: // Heart rate
-                        if (i + 1 < data.Length)
+                    case 0x03: // Heart rate (0-255)
+                        if (i + 1 < buffer.Length)
                         {
-                            Console.WriteLine($"[HR] HEART_RATE: {data[i + 1]}");
+                            int heartRate = buffer[i + 1];
+                            Console.WriteLine($"[HR] HEART_RATE: {heartRate}");
                             i++;
                         }
                         break;
 
-                    case 0x81: // EEG Power (long format)
-                        if (i + 32 < data.Length)
+                    case 0x81: // EEG Power (8x4 bytes)
+                        if (i + 32 < buffer.Length)
                         {
-                            Console.WriteLine($"[EEG] EEG_POWER:");
+                            Console.WriteLine("[EEG] EEG_POWER:");
                             for (int j = 0; j < 8; j++)
                             {
                                 uint val = (uint)(
-                                    (data[i + 1 + j * 4] << 24) |
-                                    (data[i + 2 + j * 4] << 16) |
-                                    (data[i + 3 + j * 4] << 8) |
-                                    data[i + 4 + j * 4]);
+                                    (buffer[i + 1 + j * 4] << 24) |
+                                    (buffer[i + 2 + j * 4] << 16) |
+                                    (buffer[i + 3 + j * 4] << 8) |
+                                    buffer[i + 4 + j * 4]);
                                 Console.WriteLine($"  Band {j + 1}: {val}");
                             }
                             i += 32;
                         }
                         break;
 
-                    case 0x83: // EEG Power (short format)
-                        if (i + 24 < data.Length)
+                    case 0x83: // ASIC EEG Power (8x3 bytes)
+                        if (i + 24 < buffer.Length)
                         {
-                            Console.WriteLine($"[EEG] ASIC_EEG_POWER:");
+                            Console.WriteLine("[EEG] ASIC_EEG_POWER:");
                             for (int j = 0; j < 8; j++)
                             {
                                 int offset = i + 1 + j * 3;
-                                uint value = (uint)((data[offset] << 16) | (data[offset + 1] << 8) | data[offset + 2]);
+                                uint value = (uint)((buffer[offset] << 16) | (buffer[offset + 1] << 8) | buffer[offset + 2]);
                                 Console.WriteLine($"  Band {j + 1}: {value}");
                             }
                             i += 24;
                         }
+                        break;
+
+                    default:
                         break;
                 }
             }
